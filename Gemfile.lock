@@ -1,0 +1,18 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    builder (3.2.4)
+    ri_cal (0.8.8)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  builder (~> 3.2, >= 3.2.2)
+  ri_cal (~> 0.8.8)
+
+RUBY VERSION
+   ruby 3.0.2p107
+
+BUNDLED WITH
+   2.3.26
