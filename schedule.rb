@@ -68,7 +68,7 @@ def add_schedule(xml, events)
   loop do
     current_date = event[:from].to_date
     add_title_row(xml, full_date(event[:from].to_date))
-    xml.row do
+    xml.div(class: 'row') do
       while current_date == event[:from].to_date
         add_event(xml, event)
         event = event_iter.next
