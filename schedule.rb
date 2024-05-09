@@ -48,11 +48,7 @@ def add_event(xml, event)
           time_element(xml, event[:to])
         end
         xml.h3 do
-          xml << pad_summary(event[:summary])
-                 # .map { |e| e == ' ' ? '&nbsp;' : e }
-                 # .join('<br/>')
-          # xml.br
-          # xml.text!(event[:line2])
+          xml << pad_summary(word_wrap(event[:summary]))
         end
         xml.p do
           xml << (event[:presenter].nil? ? '&nbsp;' : event[:presenter])
@@ -96,6 +92,25 @@ def word_wrap(text, line_width: 20, break_sequence: '<br/>')
   end * break_sequence
 end
 
+def print_schedule(events)
+  event_iter = events.each
+  event = event_iter.next
+  loop do
+    current_date = event[:from].to_date
+    puts full_date(event[:from].to_date)
+    while current_date == event[:from].to_date
+      line = "#{event[:from].strftime('%T')}-#{event[:to].strftime('%T')}: #{event[:summary]}"
+      line += " - #{event[:presenter].strip}" unless event[:presenter].to_s.strip.empty?
+      line += ", #{event[:location]}"
+      puts line
+      event = event_iter.next
+    end
+    puts
+  end
+rescue StopIteration
+  ''
+end
+
 def parse_ical_feed(feed_url)
   events = []
 
@@ -106,7 +121,7 @@ def parse_ical_feed(feed_url)
   cal.events.each do |event|
     # Extract relevant information from the event
     event_data = {
-      summary: word_wrap(event.summary),
+      summary: event.summary,
       presenter: event.description,
       location: event.location,
       from: event.start_time.new_offset('+01:00'),
@@ -128,7 +143,6 @@ end
 ical_feed_url = 'https://calendar.google.com/calendar/ical/c_00c8190156cd77fb4fdd9aba637470d6ee5aef356b36bad76611c51b9a64a3dc%40group.calendar.google.com/public/basic.ics'
 events = parse_ical_feed(ical_feed_url)
 
-
-
+# print_schedule(events)
 construct_schedule(events, 0)
 puts
