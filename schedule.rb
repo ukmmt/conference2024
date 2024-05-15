@@ -76,12 +76,15 @@ rescue StopIteration
   xml
 end
 
-def construct_schedule(diary, indent)
+def construct_schedules(feeds, indent)
   html = Builder::XmlMarkup.new(target: STDOUT, indent: indent)
   html.section(id: 'schedule', class: 'section schedule') do
     html.div(class: 'container') do
       add_title_row(html, 'Event Schedule')
-      add_schedule(html, diary)
+      with_schedules(feeds) do |track, events|
+        add_title_row(html, track)
+        add_schedule(html, events)
+      end
     end
   end
 end
@@ -92,6 +95,22 @@ def word_wrap(text, line_width: 20, break_sequence: '<br/>')
   end * break_sequence
 end
 
+def with_schedules(feeds)
+  feeds.each do |track, ical_feed_url|
+    events = parse_ical_feed(ical_feed_url)
+    yield track, events
+  end
+end
+
+def print_schedules(feeds)
+  with_schedules(feeds) do |track, events|
+    puts track
+    puts
+    print_schedule(events)
+    puts
+  end
+end
+
 def print_schedule(events)
   event_iter = events.each
   event = event_iter.next
@@ -99,7 +118,7 @@ def print_schedule(events)
     current_date = event[:from].to_date
     puts full_date(event[:from].to_date)
     while current_date == event[:from].to_date
-      line = "#{event[:from].strftime('%T')}-#{event[:to].strftime('%T')}: #{event[:summary]}"
+      line = "#{event[:from].strftime('%R')}-#{event[:to].strftime('%R')}: #{event[:summary]}"
       line += " - #{event[:presenter].strip}" unless event[:presenter].to_s.strip.empty?
       line += ", #{event[:location]}"
       puts line
@@ -140,9 +159,10 @@ def parse_ical_feed(feed_url)
 end
 
 # Example usage:
-ical_feed_url = 'https://calendar.google.com/calendar/ical/c_00c8190156cd77fb4fdd9aba637470d6ee5aef356b36bad76611c51b9a64a3dc%40group.calendar.google.com/public/basic.ics'
-events = parse_ical_feed(ical_feed_url)
+ical_feeds = {
+  'Primary Track' => 'https://calendar.google.com/calendar/ical/c_00c8190156cd77fb4fdd9aba637470d6ee5aef356b36bad76611c51b9a64a3dc%40group.calendar.google.com/public/basic.ics',
+  'Secondary Track' => 'https://calendar.google.com/calendar/ical/c_86b903d65d79b9bd38f964569eb24aed6bc7d81aa980970a40c3dda123cec2b5%40group.calendar.google.com/public/basic.ics'
+}
+# print_schedules(ical_feeds)
+construct_schedules(ical_feeds, 0)
 
-# print_schedule(events)
-construct_schedule(events, 0)
-puts
