@@ -130,6 +130,14 @@ rescue StopIteration
   ''
 end
 
+def tbc?(str)
+  !omit?(str) && str&.start_with?('!')
+end
+
+def omit?(str)
+  str&.start_with?('!!')
+end
+
 def parse_ical_feed(feed_url)
   events = []
 
@@ -147,9 +155,12 @@ def parse_ical_feed(feed_url)
       to: event.finish_time.new_offset('+01:00')
       # Add more fields as needed
     }
+    if tbc?(event_data[:summary])
+      event_data[:summary] = 'TBC'
+      event_data[:presenter] = 'TBC'
+    end
 
-    # Add the event data to the list
-    events << event_data
+    events << event_data unless omit?(event_data[:summary])
   end
 
   # Sort the events by start time
