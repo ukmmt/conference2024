@@ -176,4 +176,5 @@ ical_feeds = {
 }
 # print_schedules(ical_feeds)
 construct_schedules(ical_feeds, 0)
-
+puts
+puts
